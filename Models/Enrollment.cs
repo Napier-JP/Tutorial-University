@@ -16,16 +16,20 @@ namespace TutorialUniversity.Models
 
         // ナビゲーションプロパティ
         // リレーショナルDBにおいて階層的なデータ構造は持てないので該当するCourse, StudentデータをEnrollmentテーブルで見ることはできない(だからRDBで持つことのできるint IDで管理する)
-        // ところがプリミティブデータ型でない以下のプロパティを設定することで、あたかもouter join済みであるようなレコードが得られる
+        // ところがプリミティブデータ型でない以下のプロパティを設定した上で読み込ませることで、あたかもouter join済みであるようなレコードが得られる
         // すなわちenrollment.Student.LastNameという参照ができるようになる
-        // enrollmentを取って来てからstudents.Where(records => records.ID == enrollment.StudentID).Select(matched => matched.LastName).FirstOrDefault();
+        // enrollmentを取って来てからvar lastName = students.Where(stu => stu.ID == enrollment.StudentID).Select(matched => matched.LastName).FirstOrDefault();
         // などというLINQを書く手間が省ける
-        // とはいえEnrollmentを取得するたびOuter Joinしていることになるので、他ModelのIDだけが必要とされているような状況で書いても無駄になる
-        // Microsoft.EntityFrameworkCore.ProxiesをNuGetからインストールし、Startup.csでLazyLoadingを有効にするとナビゲーションプロパティへの参照がなければOuter Joinしないようになる（ただしvirtual修飾子が必須になる）
-        // virtualをつけないとスキャフォールディングに失敗するし手作りしてもおそらく取得失敗する
+        // 
+        // Microsoft.EntityFrameworkCore.ProxiesをNuGetからインストールし、Startup.csでLazyLoadingを有効にすると
+        // Dependency InjectionによりSchoolContextにおいてナビゲーションプロパティへの参照があればそのエンティティに限り自動的に読み込むようになる
+        // （ただしvirtual修飾子が必須になる）
+        // 一件だけエンティティを取得している状態では.Include()や.Collection().Load()が不要になるので便利だが、複数件のエンティティで同様に参照すると個別に読み込みクエリが走る（いわゆる1+Nクエリ問題）
+        // 列挙ページ中でナビゲーションプロパティを参照するようなときは.Include()としてEager Loadingすることで全レコードに一括outer joinが行われ1回のクエリで済む
         //
         // 前述の通りRDBで持てないデータ型なのでDB内部に以下の名前のカラムは存在せず、変更に伴うマイグレーションの必要もない
         // またどのCourse, Studentが関連しているのかを特定するために既定では{クラス名}IDという外部キーがこのModel中に必要
+        // 対応する外部キーを設定しないと自動で{クラス名}IDがDBに生成されるので注意
         public virtual Course Course { get; set; }
         public virtual Student Student { get; set; }
 

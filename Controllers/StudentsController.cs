@@ -36,7 +36,7 @@ namespace TutorialUniversity.Controllers
             {
                 return NotFound();
             }
-
+            
             return View(student);
         }
 
@@ -70,7 +70,11 @@ namespace TutorialUniversity.Controllers
                 return NotFound();
             }
 
+            // DbContextのキャッシュを探し、その後主キーによる取得を行う SingleOrDefault()/FirstOrDefault()は主キー以外でも検索して取得できるがその場合主キーのように順に並んでいるわけではないためやや遅い
+            // Findはナビゲーションプロパティの明示的読み込み（Explicit Loading）を行えないので、この編集ページのようにナビゲーションプロパティにアクセスしない場合に使うべき
+            // そうでないならDetailsのようにSingleOrDefault/FirstOrDefaultを使うこと
             var student = await _context.Students.FindAsync(id);
+            
             if (student == null)
             {
                 return NotFound();

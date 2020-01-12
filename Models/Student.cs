@@ -14,13 +14,15 @@ namespace TutorialUniversity.Models
         // 1対多のナビゲーションプロパティ(ナビゲーションプロパティの意義についてはEnrollment.csを参照せよ)
         // 生徒は複数の履修登録データを有する
         // List<Enrollment>ではなく共通に行える操作しか定義されていない抽象的なICollectionとすることで、想定していないList<T>-specificな操作が行えることを減らす
-        // 例えば履修登録の集合について追加順に意味はないのでそれに依存した操作を考えるべきではない
-        // だからList<Enrollment>では可能なenrollemnts[0]のような参照をさせないためにICollection
-        // ICollectionにはCountプロパティがあるので、何件履修登録しているのか調べることはできる
+        // 例えばList<T>のメソッドにFindAll()があるが、これは絞り込んだ結果をToList()する。順序に意味がない履修登録では、添え字による操作は必要ないはずである。
+        // ICollection<T>にしておくことでforeachやCountを認めつつ、ToListの無駄が生じる可能性がモデル設計段階で防止される。
+        //
+        // 他方、ユーザや開発者が新しく用意してDBに入れようとする履修登録データはICollection<T>を実装していれば何でもよい。
+        // List<T>やHashSet<T>、Dictionary<TKey, Enrollment>.Valuesのいずれも受け入れられる。これは設計者がデータ構造に関与できない外部データを利用する際に便利である。ここでもToList()しなくて済む。
         public virtual ICollection<Enrollment> Enrollments { get; set; }
         public virtual ICollection<Penalty> Penalties { get; set; }
 
-        // メンバ変数ではなくプロパティ (GPAはEnrollmentsから算出されるものであって、勝手に変更できるものではない)
+        // メンバ変数ではなくプロパティ　DBには存在しない(GPAはEnrollmentsから算出されるものであって、勝手に変更できるものではない) 
         public double GPA => Enrollments.Average(enr => (double)enr.Grade);
     }
 }
