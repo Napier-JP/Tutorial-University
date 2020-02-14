@@ -17,11 +17,9 @@ namespace TutorialUniversity.Models
         // ナビゲーションプロパティ
         // リレーショナルDBにおいて階層的なデータ構造は持てないので該当するCourse, StudentデータをEnrollmentテーブルで見ることはできない(だからRDBで持つことのできるint IDで管理する)
         // ところがプリミティブデータ型でない以下のプロパティを設定した上で読み込ませることで、あたかもouter join済みであるようなレコードが得られる
-        // すなわちenrollment.Student.LastNameという参照ができるようになる
-        // enrollmentを取って来てからvar lastName = students.Where(stu => stu.ID == enrollment.StudentID).Select(matched => matched.LastName).FirstOrDefault();
-        // などというLINQを書く手間が省ける
+        // すなわちController側で意識して関連エンティティを読み込ませなくともenrollment.Student.LastNameという参照がViewでできるようになる
         // 
-        // Microsoft.EntityFrameworkCore.ProxiesをNuGetからインストールし、Startup.csでLazyLoadingを有効にすると
+        // Microsoft.EntityFrameworkCore.ProxiesをNuGetからインストールし、Startup.csでLazyLoading(この言い方は誤解を生じやすく、On-Demand Loadingと呼ぶべきだと思う)を有効にすると
         // Dependency InjectionによりSchoolContextにおいてナビゲーションプロパティへの参照があればそのエンティティに限り自動的に読み込むようになる
         // （ただしvirtual修飾子が必須になる）
         // 一件だけエンティティを取得している状態では.Include()や.Collection().Load()が不要になるので便利だが、複数件のエンティティで同様に参照すると個別に読み込みクエリが走る（いわゆる1+Nクエリ問題）

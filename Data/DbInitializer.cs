@@ -1,14 +1,16 @@
 ﻿using TutorialUniversity.Models;
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace TutorialUniversity.Data
 {
-    public static class DbInitializer // 初回実行時DBに仮データを入れる
+    public static class DbInitializer // 初回実行時DBに仮データを入れる Program.csで実行される
     {
         public static void Initialize(SchoolContext context)
         {
-            context.Database.EnsureCreated();
+            context.Database.Migrate();
+            //context.Database.EnsureCreated();
 
             // Look for any students.
             if (context.Students.Any())

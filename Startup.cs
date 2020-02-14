@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TutorialUniversity.Data;
+using TutorialUniversity.Hubs;
 
 namespace TutorialUniversity
 {
@@ -29,6 +31,14 @@ namespace TutorialUniversity
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddSignalR();
+            // AutoMapperの設定を参照させ、Mapperを一つだけ動かす
+            services.AddAutoMapper(typeof(AutoMapperProfileConfiguration));
+            // IMapperが必要とされたタイミングでシングルトン（アプリケーション全体で一つ不変のものでよいので）としてMapperクラスインスタンスを供給させる
+            services.AddSingleton<IMapper, Mapper>();
+
+            // SchoolContextという設定をSQliteとの対応関係として認識させ、Lazy(On-Demand) Loadingの対象とする
+            // またSchoolContextが必要とされたタイミングでSchoolContextインスタンスを供給する
             services.AddDbContext<SchoolContext>(options => options.UseLazyLoadingProxies().UseSqlite(Configuration.GetConnectionString("SchoolDBContext")));
         }
 
@@ -51,9 +61,9 @@ namespace TutorialUniversity
             app.UseRouting();
 
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ComputationHub>("/compute");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -25,23 +25,43 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EnrollmentDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EnrollmentDate)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<input type="button" value="進捗確認" onclick="check();" />
+<script>$(function () {
+        // 1. サーバとの接続オブジェクト作成
+        var connection = $.hubConnection();
+        // 2. Hubのプロキシ・オブジェクトを作成
+        var echo = connection.createHubProxy("ComputationProgressHub");
+
+        // 3. サーバから呼び出される関数を登録
+        echo.on("ReceiveProgressInfo", function (text) {
+            alert(text);
+        });
+
+        // 4. 接続を開始
+        connection.start(function () {
+            // 5. サーバのメソッドを呼び出し
+            echo.invoke("SendProgressInfo");
+        });
+    })</script>

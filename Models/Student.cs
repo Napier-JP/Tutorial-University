@@ -4,11 +4,12 @@ using System.Linq;
 
 namespace TutorialUniversity.Models
 {
-    public class Student
+    public class Student // StudentViewModelも参照せよ
     {
         public int ID { get; set; }
         public string LastName { get; set; }
         public string FirstName { get; set; }
+        public string SomeSecret { get; set; } // Viewでアクセスされては困るプロパティの例
         public DateTime EnrollmentDate { get; set; }
 
         // 1対多のナビゲーションプロパティ(ナビゲーションプロパティの意義についてはEnrollment.csを参照せよ)
@@ -22,7 +23,7 @@ namespace TutorialUniversity.Models
         public virtual ICollection<Enrollment> Enrollments { get; set; }
         public virtual ICollection<Penalty> Penalties { get; set; }
 
-        // メンバ変数ではなくプロパティ　DBには存在しない(GPAはEnrollmentsから算出されるものであって、勝手に変更できるものではない) 
+        // プロパティだが加工された値を返すgetterオンリーでありDBには存在しない(GPAはEnrollmentsから算出されるものであって、独立に変更できるものではない) 
         public double GPA => Enrollments.Average(enr => (double)enr.Grade);
     }
 }
